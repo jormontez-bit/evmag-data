@@ -3,6 +3,26 @@ import playwright from "playwright";
 
 const URL = "https://evmag.pt/guia-interativo/";
 
+async function autoScroll(page) {
+  await page.evaluate(async () => {
+    await new Promise(resolve => {
+      let totalHeight = 0;
+      const distance = 400;
+
+      const timer = setInterval(() => {
+        const scrollHeight = document.body.scrollHeight;
+        window.scrollBy(0, distance);
+        totalHeight += distance;
+
+        if (totalHeight >= scrollHeight - window.innerHeight) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 200);
+    });
+  });
+}
+
 (async () => {
   console.log("A abrir browser headless...");
   const browser = await playwright.chromium.launch({ headless: true });
@@ -11,8 +31,11 @@ const URL = "https://evmag.pt/guia-interativo/";
   console.log("A carregar página...");
   await page.goto(URL, { waitUntil: "networkidle" });
 
-  console.log("A esperar pelas linhas da tabela virtual...");
-  await page.waitForSelector("div[role='row']");
+  console.log("A fazer scroll para carregar todas as linhas...");
+  await autoScroll(page);
+
+  console.log("A esperar pelas linhas...");
+  await page.waitForSelector("div[role='row']", { timeout: 20000 });
 
   console.log("A extrair dados...");
   const modelos = await page.$$eval("div[role='row']", rows => {
@@ -21,15 +44,12 @@ const URL = "https://evmag.pt/guia-interativo/";
         const cells = [...row.querySelectorAll("div[role='cell']")].map(c =>
           c.innerText.trim()
         );
-
-        // Ignorar cabeçalho ou linhas vazias
         if (cells.length < 3) return null;
 
         return {
           marca: cells[0],
           modelo: cells[1],
           autonomia: cells[2],
-          // Se houver mais colunas, adiciona aqui
         };
       })
       .filter(Boolean);
