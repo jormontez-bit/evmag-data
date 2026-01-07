@@ -3,21 +3,23 @@ import playwright from "playwright";
 
 const URL = "https://evmag.pt/guia-interativo/";
 
+// Scroll inteligente: continua até não haver mais conteúdo novo
 async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise(resolve => {
-      let totalHeight = 0;
-      const distance = 400;
+      let lastHeight = 0;
 
       const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
-        window.scrollBy(0, distance);
-        totalHeight += distance;
+        const currentHeight = document.body.scrollHeight;
+        window.scrollTo(0, currentHeight);
 
-        if (totalHeight >= scrollHeight - window.innerHeight) {
+        // Se a altura não mudou, acabou o conteúdo
+        if (currentHeight === lastHeight) {
           clearInterval(timer);
           resolve();
         }
+
+        lastHeight = currentHeight;
       }, 200);
     });
   });
@@ -44,6 +46,8 @@ async function autoScroll(page) {
         const cells = [...row.querySelectorAll("div[role='cell']")].map(c =>
           c.innerText.trim()
         );
+
+        // Ignorar cabeçalhos ou linhas incompletas
         if (cells.length < 3) return null;
 
         return {
