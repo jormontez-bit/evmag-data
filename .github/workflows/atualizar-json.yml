@@ -22,7 +22,7 @@ jobs:
         run: npm install
 
       - name: Gerar JSON
-        run: node gerar-json.js
+        run: node scripts/gerar-json.js
 
       - name: Commit e push das alterações
         run: |
