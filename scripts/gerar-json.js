@@ -27,7 +27,10 @@ async function autoScroll(page) {
 
 (async () => {
   console.log("A abrir browser headless...");
-  const browser = await playwright.chromium.launch({ headless: true });
+const browser = await playwright.chromium.launch({
+  headless: false,
+  args: ["--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox"]
+});
   const page = await browser.newPage();
 
   console.log("A carregar página...");
