@@ -1,20 +1,28 @@
 import fs from "fs";
 import xlsx from "xlsx";
 
-// Caminho do ficheiro Excel no repositório
+// Caminho do ficheiro Excel
 const EXCEL_PATH = "electric_cars_portugal.xlsx";
 
-// Caminho do JSON final
-const JSON_PATH = "data/evmag-carros.json";
+// Pasta e ficheiro de saída
+const JSON_DIR = "data";
+const JSON_PATH = `${JSON_DIR}/evmag-carros.json`;
 
+// Função para normalizar IDs
 function normalizarId(marca, modelo) {
   return (
-    marca.toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-") +
-    "-" +
-    modelo.toLowerCase()
+    `${marca}-${modelo}`
+      .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-  ).replace(/-+/g, "-").replace(/^-|-$/g, "");
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+  );
+}
+
+// Garantir que a pasta existe
+if (!fs.existsSync(JSON_DIR)) {
+  console.log("Pasta 'data/' não existe. A criar...");
+  fs.mkdirSync(JSON_DIR);
 }
 
 console.log("A ler Excel...");
