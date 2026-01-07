@@ -1,3 +1,10 @@
+name: Atualizar JSON do Guia Interativo
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
 jobs:
   gerar-json:
     runs-on: ubuntu-latest
